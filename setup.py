@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 install_requires = open('requirements.txt').read().split('\n')
 
@@ -23,6 +23,10 @@ setup(
         'Environment :: Console',
         'Topic :: Scientific/Engineering :: Image Recognition'
     ],
-    keywords=['OCR', 'page splitting', 'page dewarping', 'perspective correction', 'voissour']
-
+    keywords=['OCR', 'page splitting', 'page dewarping', 'keystoning', 'perspective correction', 'voussoir'],
+    entry_points={
+        'console_scripts': [
+            'pyvoussoir = voussoir.cli:main',
+        ]
+    },
 )

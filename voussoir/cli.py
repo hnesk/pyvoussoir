@@ -5,11 +5,11 @@ Description:
     This program takes images of books (each picture including a two-page spread), detects special glyphs pasted in the corners of the book, and de-keystones and thereby digitally flattens the pages. It then automatically separates the pages into separate, cropped image files
 
 Usage:
-      voussoir      
-      voussoir (-h | --help)     
-      voussoir (-v | --version)      
-      voussoir [--verbose] [--no-left-page] [--no-right-page] [-w <page_width_argument>] [-t <page_height_argument>] [-i <input_image>] [<output_image_one>] [<output_image_two>]      
-      voussoir [--verbose] [--no-left-page] [--no-right-page] [-w <page_width_argument>] [-t <page_height_argument>] [-d <dpi>] [--offset-left-page-left-side <offset_left_page_left_side>] [--offset-left-page-right-side <offset_left_page_right_side>] [--offset-left-page-top-side <offset_left_page_top_side>] [--offset-left-page-bottom-side <offset_left_page_bottom_side>] [--offset-right-page-left-side <offset_right_page_left_side>] [--offset-right-page-right-side <offset_right_page_right_side>] [--offset-right-page-top-side <offset_right_page_top_side>] [--offset-right-page-bottom-side <offset_right_page_bottom_side>] [-i <input_image>] [<output_image_one>] [<output_image_two>]
+      pyvoussoir
+      pyvoussoir (-h | --help)
+      pyvoussoir (-v | --version)
+      pyvoussoir [--verbose] [--no-left-page] [--no-right-page] [-w <page_width_argument>] [-t <page_height_argument>] [-i <input_image>] [<output_image_one>] [<output_image_two>]
+      pyvoussoir [--verbose] [--no-left-page] [--no-right-page] [-w <page_width_argument>] [-t <page_height_argument>] [-d <dpi>] [--offset-left-page-left-side <offset_left_page_left_side>] [--offset-left-page-right-side <offset_left_page_right_side>] [--offset-left-page-top-side <offset_left_page_top_side>] [--offset-left-page-bottom-side <offset_left_page_bottom_side>] [--offset-right-page-left-side <offset_right_page_left_side>] [--offset-right-page-right-side <offset_right_page_right_side>] [--offset-right-page-top-side <offset_right_page_top_side>] [--offset-right-page-bottom-side <offset_right_page_bottom_side>] [-i <input_image>] [<output_image_one>] [<output_image_two>]
 
 Options:
       -h --help     Show this screen.
@@ -46,7 +46,6 @@ Placing markers:
 from docopt import docopt
 from schema import Schema, And, Use, Or, SchemaError
 import os
-import sys
 import cv2
 from voussoir.pagewarper import PageWarper, LayoutInfo
 
@@ -65,15 +64,15 @@ def validate(args):
 
     def non_existing_image(filename):
         if os.path.exists(filename):
-            raise RuntimeError('File "{0}" already exists'.format(filename))
+            raise SchemaError('File "{0}" already exists'.format(filename))
         ensure_opencv_filename(filename)
         return os.path.realpath(filename)
 
     def existing_image(filename):
         if not filename:
-            raise RuntimeError('No file given')
+            raise SchemaError('No file given')
         if not os.path.exists(filename):
-            raise RuntimeError('File "{0}" does not exist'.format(filename))
+            raise SchemaError('File "{0}" does not exist'.format(filename))
         ensure_opencv_filename(filename)
         return os.path.realpath(filename)
 
@@ -108,7 +107,7 @@ def validate(args):
     return args
 
 
-def main(args):
+def process(args):
     image = cv2.imread(args['--input-image'])
     page_width = args['--page-width']
     page_height = args['--page-height']
@@ -133,18 +132,7 @@ def main(args):
             cv2.imwrite(args[filename], page_image)
 
 
-if __name__ == '__main__':
+def main():
     args = docopt(__doc__, version='pyvouissour 0.2')
-
-    try:
-        args = validate(args)
-    except SchemaError as e:
-        sys.exit(e)
-
-    try:
-        main(args)
-    except Exception as e:
-        print(e)
-        sys.exit(e)
-
-    sys.exit(0)
+    args = validate(args)
+    process(args)
