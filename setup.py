@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+from setuptools import setup
 
 install_requires = open('requirements.txt').read().split('\n')
 
@@ -14,7 +14,7 @@ setup(
     long_description_content_type='text/markdown',
     url="https://github.com/hnesk/pyvoussoir",
     packages=['voussoir'],
-    install_requires = install_requires,
+    install_requires=install_requires,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: ISC License (ISCL)',

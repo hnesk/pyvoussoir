@@ -52,15 +52,11 @@ from voussoir.pagewarper import PageWarper, LayoutInfo
 
 def validate(args):
     def ensure_opencv_filename(filename):
-        ext = os.path.splitext(filename)[1].lstrip('.').lower()
-        opencv_exts = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'webp', 'pbm', 'pgm', 'ppm', 'sr', 'ras',
-                       'tiff', 'tif']
+        extension = os.path.splitext(filename)[1].lstrip('.').lower()
+        opencv_extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'webp', 'pbm', 'pgm', 'ppm', 'sr', 'ras', 'tiff', 'tif']
 
-        if not ext in opencv_exts:
-            raise RuntimeError(
-                'Wrong image file extension "{0}". Please use an OpenCV supported image file extension: {1}'.format(ext,
-                                                                                                                    ','.join(
-                                                                                                                        opencv_exts)))
+        if extension not in opencv_extensions:
+            raise RuntimeError('Wrong image file extension "{0}". Please use an OpenCV supported image file extension: {1}'.format(extension, ','.join(opencv_extensions)))
 
     def non_existing_image(filename):
         if os.path.exists(filename):
@@ -133,6 +129,6 @@ def process(args):
 
 
 def main():
-    args = docopt(__doc__, version='pyvouissour 0.2')
+    args = docopt(__doc__, version='pyvoussoir 0.2')
     args = validate(args)
     process(args)

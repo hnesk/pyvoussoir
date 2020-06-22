@@ -58,9 +58,8 @@ class Marker:
         homography, mask = cv2.findHomography(src_points, dst_points)
 
         marker_big = cv2.warpPerspective(image, homography, (size, size))
-        marker_small = cv2.resize(marker_big,(6,6))
-        thr, marker = cv2.threshold(marker_small,0,255,cv2.THRESH_OTSU)
-
+        marker_small = cv2.resize(marker_big, (6, 6))
+        thr, marker = cv2.threshold(marker_small, 0, 255, cv2.THRESH_OTSU)
 
         rotation = Marker.check_rotation(marker)
 
@@ -99,11 +98,12 @@ class LayoutInfo:
         return int(round((self.right - self.left) * self.dpi)), int(round((self.bottom - self.top) * self.dpi))
 
     def __repr__(self):
-        return 'LayoutInfo({0},{1},{2},{3},{4},{5},{6})'.format(self.left, self.top, self.right, self.bottom, self.width, self.height, self.dpi)
+        return 'LayoutInfo({0},{1},{2},{3},{4},{5},{6})'.format(self.left, self.top, self.right, self.bottom,
+                                                                self.width, self.height, self.dpi)
 
 
 class PageWarper:
-    def __init__(self, image, max_ratio=2.2, min_area=0.0001, max_area=0.001, approx_epsilon = 0.02, debug_image = None):
+    def __init__(self, image, max_ratio=2.2, min_area=0.0001, max_area=0.001, approx_epsilon=0.02, debug_image=None):
         self.max_ratio = max_ratio
         self.min_area = min_area
         self.max_area = max_area
@@ -119,14 +119,12 @@ class PageWarper:
         markers = dict()
         for square in squares:
             try:
-                marker = Marker.create(image,square)
+                marker = Marker.create(image, square)
                 markers[marker.id] = marker
-            except RuntimeError as e:
-                #display(e)
+            except RuntimeError:
                 # ignore squares that are no markers
                 pass
         return markers
-
 
     def get_warped_image(self, layout, right=False):
         dst_markers = layout.get_dst_markers(right)
@@ -135,45 +133,47 @@ class PageWarper:
         homography, mask = cv2.findHomography(dst_points, src_points)
         return cv2.warpPerspective(self.image, homography, layout.get_size())
 
-    def guess_layouts(self, l=0, t=0.5, r=0.5, b=0.5, dpi = 600.0):
-        leftSize = self.guess_size(False)
-        rightSize = self.guess_size(True)
-        commonHeight = (leftSize[0][1] + rightSize[0][1]) * 0.5
-        return LayoutInfo(l,t,r,b,leftSize[0][0],commonHeight,dpi), LayoutInfo(l,t,r,b,rightSize[0][0],commonHeight,dpi)
-        #display(leftSize)
-        #display(rightSize)
+    def guess_layouts(self, left=0, top=0.5, right=0.5, bottom=0.5, dpi=600.0):
+        left_size = self.guess_size(False)
+        right_size = self.guess_size(True)
+        common_height = (left_size[0][1] + right_size[0][1]) * 0.5
+        return (
+            LayoutInfo(left, top, right, bottom, left_size[0][0], common_height, dpi),
+            LayoutInfo(left, top, right, bottom, right_size[0][0], common_height, dpi)
+        )
 
-    def guess_size(self,right = False):
+    def guess_size(self, right=False):
         # marker is 0.5 inch wide and high
         marker_size = 0.5
-        dst_markers = LayoutInfo(0,0,0,0,1,1).get_dst_markers(right)
-        src_points = np.zeros((len(dst_markers),2),dtype=np.float64)
-        dst_points = np.zeros((len(dst_markers),2),dtype=np.float64)
+        dst_markers = LayoutInfo(0, 0, 0, 0, 1, 1).get_dst_markers(right)
+        src_points = np.zeros((len(dst_markers), 2), dtype=np.float64)
+        dst_points = np.zeros((len(dst_markers), 2), dtype=np.float64)
         cnt = 0
         for i in dst_markers:
-            if not i in self.markers:
+            if i not in self.markers:
                 raise RuntimeError('Index {0} does not exist in source markers'.format(i))
             src_points[cnt] = dst_markers[i]
             dst_points[cnt] = self.markers[i].points[0]
             cnt += 1
 
-        src_points = (src_points > 0)*1.0
-        homography, mask = cv2.findHomography(dst_points,src_points)
+        src_points = (src_points > 0) * 1.0
+        homography, mask = cv2.findHomography(dst_points, src_points)
 
         heights = []
         widths = []
 
         for i in dst_markers:
             m = self.markers[i]
-            tp = self.warp(homography,m.points)
-            widths.append(np.linalg.norm(tp[3]-tp[0]))
-            widths.append(np.linalg.norm(tp[2]-tp[1]))
-            heights.append(np.linalg.norm(tp[2]-tp[3]))
-            heights.append(np.linalg.norm(tp[1]-tp[0]))
+            tp = self.warp(homography, m.points)
+            widths.append(np.linalg.norm(tp[3] - tp[0]))
+            widths.append(np.linalg.norm(tp[2] - tp[1]))
+            heights.append(np.linalg.norm(tp[2] - tp[3]))
+            heights.append(np.linalg.norm(tp[1] - tp[0]))
 
-        return (marker_size/np.mean(widths),marker_size/np.mean(heights)), (np.std(widths),np.std(heights))
+        return (marker_size / np.mean(widths), marker_size / np.mean(heights)), (np.std(widths), np.std(heights))
 
-    def warp(self, m, s):
+    @staticmethod
+    def warp(m, s):
         s = np.array(s)
         ex = np.ones((s.shape[0], 3), dtype=s.dtype)
         ex[:, 0:2] = s
@@ -185,12 +185,12 @@ class PageWarper:
         dst_points = np.zeros((len(dst_markers), 2), dtype=np.float32)
         cnt = 0
         for i, dst_marker in dst_markers.items():
-            if not i in self.markers:
+            if i not in self.markers:
                 raise RuntimeError('Index {0} does not exist in source markers'.format(i))
             src_points[cnt] = layout.convert_marker(dst_marker)
             dst_points[cnt] = self.markers[i].points[0]
             cnt += 1
-        return (dst_points, src_points)
+        return dst_points, src_points
 
     def __get_squares(self, image):
         candidates = []
