@@ -4,5 +4,5 @@ Automatic de-keystoning/page-splitting tool for single camera book scanners, pyt
 ## Installation
 
 ```
-pip install git+https://github.com/hnesk/pyvoussoir.git
+pip install pyvoussoir
 ```
