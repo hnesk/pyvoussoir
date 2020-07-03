@@ -5,11 +5,11 @@ install_requires = open('requirements.txt').read().split('\n')
 
 setup(
     name='pyvoussoir',
-    version='0.2',
+    version='0.2.0.2',
     author='Johannes Künsebeck',
     author_email='kuensebeck@googlemail.com',
     description='Automatic de-keystoning/page-splitting tool for single camera book scanners',
-    license='Apache License 2.0',
+    license='ISC License',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     url="https://github.com/hnesk/pyvoussoir",
