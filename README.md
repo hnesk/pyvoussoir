@@ -1,5 +1,8 @@
 # pyvoussoir
-Automatic de-keystoning/page-splitting tool for single camera book scanners, python port of [voussoir](https://github.com/publicus/voussoir). 
+Automatic de-keystoning/page-splitting tool for single camera book scanners.
+
+This is a commandline compatible python port of the C++ tool [voussoir](https://github.com/publicus/voussoir) by Jacob Levernier, which is a maintained and cleaned up fork of the one day project [bookscan](https://github.com/ytsutano/bookscan) by Yutaka Tsutano.
+
 
 ## Installation
 
@@ -81,3 +84,9 @@ into this (example/page_left.jpg):
 and this (example/page_right.jpg):
 
 ![Left page](https://raw.githubusercontent.com/hnesk/pyvoussoir/master/example/page_right.jpg)
+
+## Contributors (in reverse-chronological order)
+
+* [Johannes Künsebeck](https://github.com/hnesk/ "Johannes Künsebecks github profile")
+* [Jacob Levernier](http://adunumdatum.org "Jacob Levernier's website")
+* [Yutaka Tsutano](http://yutaka.tsutano.com "Yutaka Tsutano's website"), original author of bookscan
