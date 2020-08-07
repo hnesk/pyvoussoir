@@ -40,31 +40,37 @@ Options:
       --offset-right-page-bottom-side=<offset_right_page_bottom_side>  Page offset, in the same units as page height and width. [default: 0.00]
 
 Placing markers:
-    Within the docs directory, you'll find PDF and Adobe Illustrator / Inkscape versions of a series of 15 "glyphs," small images that each comprises a unique pattern of pixels in a 6x6 grid. You'll need to print and cut out the glyphs; at the moment, only glyphs 0-3 (left page) and 4-7 (right page) are needed. Tape or otherwise affix the glyphs in clockwise order around the perimeter of each book page (for example, if you're using a glass or acrylic platen to flatten the pages of a book, affix the glyphs in each corner of the platen: starting at the top left and moving clockwise to the center/spine of the book, place glyphs 0, 1, 2, and 3 around the left page, and (again from top left and moving clockwise) glyphs 4, 5, 6, and 7 on the right page. The program will, by default, crop to the inside vertical, outside horizontal edge of the glyphs it detects. This can be adjusted using the offset arguments defined above. The offset arguments can be positive or negative (e.g., setting --offset-left-page-left-side to -0.5 will move the crop line to the left 0.5 units).
+    Within the markers directory, you'll find PDF and Adobe Illustrator / Inkscape versions of a series of 15 "glyphs," small images that each comprises a unique pattern of pixels in a 6x6 grid. You'll need to print and cut out the glyphs; at the moment, only glyphs 0-3 (left page) and 4-7 (right page) are needed. Tape or otherwise affix the glyphs in clockwise order around the perimeter of each book page (for example, if you're using a glass or acrylic platen to flatten the pages of a book, affix the glyphs in each corner of the platen: starting at the top left and moving clockwise to the center/spine of the book, place glyphs 0, 1, 2, and 3 around the left page, and (again from top left and moving clockwise) glyphs 4, 5, 6, and 7 on the right page. The program will, by default, crop to the inside vertical, outside horizontal edge of the glyphs it detects. This can be adjusted using the offset arguments defined above. The offset arguments can be positive or negative (e.g., setting --offset-left-page-left-side to -0.5 will move the crop line to the left 0.5 units).
 """
+import os
+from typing import Any, Dict
 
+import cv2
 from docopt import docopt
 from schema import Schema, And, Use, Or, SchemaError
-import os
-import cv2
+
+from voussoir import __version__ as version
 from voussoir.pagewarper import PageWarper, LayoutInfo
 
 
-def validate(args):
-    def ensure_opencv_filename(filename):
+def validate(args: Dict[str, str]) -> Dict[str, Any]:
+    def ensure_opencv_filename(filename: str) -> None:
         extension = os.path.splitext(filename)[1].lstrip('.').lower()
-        opencv_extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'webp', 'pbm', 'pgm', 'ppm', 'sr', 'ras', 'tiff', 'tif']
+        opencv_extensions = ['bmp', 'dib', 'jpg', 'jpeg', 'jpe', 'jp2', 'png', 'webp', 'pbm', 'pgm', 'ppm', 'sr', 'ras',
+                             'tiff', 'tif']
 
         if extension not in opencv_extensions:
-            raise RuntimeError('Wrong image file extension "{0}". Please use an OpenCV supported image file extension: {1}'.format(extension, ','.join(opencv_extensions)))
+            raise RuntimeError(
+                'Wrong image file extension "{0}". Please use an OpenCV supported image file extension: {1}'.format(
+                    extension, ','.join(opencv_extensions)))
 
-    def non_existing_image(filename):
+    def non_existing_image(filename: str) -> str:
         if os.path.exists(filename):
             raise SchemaError('File "{0}" already exists'.format(filename))
         ensure_opencv_filename(filename)
         return os.path.realpath(filename)
 
-    def existing_image(filename):
+    def existing_image(filename: str) -> str:
         if not filename:
             raise SchemaError('No file given')
         if not os.path.exists(filename):
@@ -103,13 +109,14 @@ def validate(args):
     return args
 
 
-def process(args):
+def process(args: Dict[str, Any]) -> None:
     image = cv2.imread(args['--input-image'])
     page_width = args['--page-width']
     page_height = args['--page-height']
     dpi = args['--dpi']
 
-    pw = PageWarper(image)
+    pw = PageWarper()
+    pw.set_image(image)
 
     for i, side in enumerate(['left', 'right']):
         if not args['--no-' + side + '-page']:
@@ -122,13 +129,12 @@ def process(args):
                 page_height,
                 dpi
             )
-            print(layout)
             page_image = pw.get_warped_image(layout, bool(i))
             filename = '<output_image_' + ('one' if i == 0 else 'two') + '>'
             cv2.imwrite(args[filename], page_image)
 
 
-def main():
-    args = docopt(__doc__, version='pyvoussoir 0.2')
+def main() -> None:
+    args = docopt(__doc__, version='pyvoussoir {}'.format(version))
     args = validate(args)
     process(args)
