@@ -72,7 +72,7 @@ pyvoussoir --dpi 300 --offset-left-page-right-side 0.5 --offset-left-page-top-si
 
 Turns this (example/scan.jpg)
 
-![Original Scan](https://raw.githubusercontent.com/hnesk/pyvoussoir/master/example/scan.jpg)
+![Original Scan](https://raw.githubusercontent.com/hnesk/pyvoussoir/master/example/scan-small.jpg)
 
 into this (example/page_left.jpg):
 
