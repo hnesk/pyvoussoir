@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+from voussoir import __version__
 
 install_requires = open('requirements.txt').read().split('\n')
 
 setup(
     name='pyvoussoir',
-    version='0.2.0.2',
+    version=__version__,
     author='Johannes Künsebeck',
     author_email='kuensebeck@googlemail.com',
     description='Automatic de-keystoning/page-splitting tool for single camera book scanners',
